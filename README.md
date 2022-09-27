@@ -11,7 +11,9 @@ This is really very easy to use
 ```yaml
 dependencies:
   appwrite_auth_kit:
-    git: https://github.com/mrdiin/appwrite_auth_kit
+    git:
+      url: https://github.com/mrdiin/appwrite_auth_kit.git
+      ref: master
 ```
 
 1. Wrap your MaterialApp `AppwriteAuthKit` passing a properly initialized Appwrite Client. Example below:
