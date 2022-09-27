@@ -1,39 +1,82 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# Appwrite Auth Kit
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages).
+A Flutter wrapper for Appwrite's Accounts service, makes it easy to use manage authentication and account features.
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages).
--->
+## Getting Started
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+This is really very easy to use
 
-## Features
+1. Add dependency
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
-## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
-```dart
-const like = 'sample';
+```yaml
+dependencies:
+  appwrite_auth_kit:
+    git: https://github.com/mrdiin/appwrite_auth_kit
 ```
 
-## Additional information
+1. Wrap your MaterialApp `AppwriteAuthKit` passing a properly initialized Appwrite Client. Example below:
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+```dart
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late Client client;
+  @override
+  void initState() {
+    super.initState();
+    //initialize your client
+    client = Client();
+    client
+        .setEndpoint('https://localhost/v1')
+        .setProject('60793ca4ce59e')
+        .setSelfSigned();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppwriteAuthKit(
+      client: client,
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: MainScreen(),
+      ),
+    );
+  }
+}
+```
+
+2. Access `authNotifier` from `context`. `authNotifier` is an instance of `AuthNotifier` that provides all the functions of Appwrite's Account service and some easy way to handle authentication.
+3. Get `context.authNotifier.status` gets the authentication status which can be one of the `AuthStatus.uninitialized`, `AuthStatus.unauthenticated`, `AuthStatus.authenticating` and `AuthStatus.authenticated`. You can check the status and display the appropriate UI, for example
+
+```dart
+class MainScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final authNotifier = context.authNotifier;
+
+    Widget widget;
+    switch (authNotifier.status) {
+      case AuthStatus.authenticated:
+        widget = AdminPage();
+        break;
+      case AuthStatus.unauthenticated:
+      case AuthStatus.authenticating:
+        widget = LoginPage();
+        break;
+      case AuthStatus.uninitialized:
+      default:
+        widget = LoadingPage();
+        break;
+    }
+    return widget;
+  }
+}
+```
+
+4. You must use the functions from the `context.authNotifier` instead default Account service from Appwrite SDK to create user, create session (login), delete session (logout), so that the `context.authNotifier?.status` is properly updated and your UI updates accordingly.
